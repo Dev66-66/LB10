@@ -65,3 +65,11 @@
 **Дата:** 2026-04-03
 **Промпт:** Финализируй проект. 1) Обнови README.md: данные студента, запуск Go-сервиса (go run ./cmd/server), запуск Python-сервиса (uvicorn main:app --reload), генерация proto, запуск тестов (go test ./... и pytest), переменные окружения (JWT_SECRET, GO_SERVICE_URL, GRPC_HOST), ASCII-диаграмма взаимодействия сервисов. 2) Убедись что PROMPT_LOG.md содержит записи для всех 8 промптов. 3) Запусти go vet ./... и исправь предупреждения. 4) Убедись что GetAll() возвращает [] а не null.
 **Результат:** README.md полностью переписан: данные студента, ASCII-архитектурная диаграмма, таблицы эндпоинтов для обоих сервисов, таблица переменных окружения, инструкции запуска, тестирования и генерации proto. go vet ./... — без ошибок. GetAll() использует make([]models.Workout, 0, ...) → всегда возвращает JSON-массив []. Все тесты проходят: Go (12 тестов), Python (6 тестов). PROMPT_LOG.md содержит все 8 промптов. 1 коммит, push выполнен.
+
+---
+
+## Промпт 9 — Исправление замечаний code review
+
+**Дата:** 2026-04-03
+**Промпт:** Исправь все найденные проблемы и недочёты из code review. Оставляя атомарные коммиты.
+**Результат:** Выполнено 4 атомарных коммита. (1) Рефакторинг Python-сервиса: единственный синглтон GoWorkoutService через services/dependencies.py, все роутеры используют Depends() вместо module-level инстансов, добавлен asyncio.Lock для token refresh (double-checked locking), lifespan закрывает httpx-клиент при завершении, тест reset_tokens упрощён до одного инстанса, env-переменные GO_SERVICE_URL/GO_USERNAME/GO_PASSWORD/GRPC_HOST читаются через os.getenv. (2) WorkoutResponse: type и difficulty — Literal вместо str; grpc_workout_service: bare except → grpc.aio.AioRpcError. (3) Go gRPC: CreateWorkout теперь валидирует type, difficulty, duration, calories_burned аналогично HTTP-хендлеру. (4) .gitignore: glob **.exe покрывает поддиректории; README: go run ./cmd/server, добавлены GO_USERNAME/GO_PASSWORD в таблицу env vars, удалена заметка о захардкоженных значениях; proto/__init__.py: добавлен поясняющий комментарий. Все тесты проходят (Go: 12, Python: 6). Push выполнен.
