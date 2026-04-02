@@ -130,7 +130,7 @@ uvicorn main:app --reload --port 8000
 
 ```bash
 cd go-service
-go test ./...
+go test -count=1 ./...
 ```
 
 ### Python

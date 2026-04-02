@@ -13,6 +13,9 @@ _GRPC_TIMEOUT = 5.0  # seconds per RPC call
 class GrpcWorkoutService:
     """gRPC client for the Go workout service."""
 
+    async def aclose(self) -> None:
+        """No-op: channels are created per-request. Reserved for future connection pooling."""
+
     async def get_by_id(self, workout_id: int) -> dict:
         try:
             async with aio.insecure_channel(_GO_GRPC_HOST) as channel:

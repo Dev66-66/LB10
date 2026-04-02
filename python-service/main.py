@@ -3,13 +3,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from routers import auth, stats, workouts
-from services.dependencies import _go_service
+from services.dependencies import _go_service, _grpc_service
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
     await _go_service.aclose()
+    await _grpc_service.aclose()
 
 
 app = FastAPI(
