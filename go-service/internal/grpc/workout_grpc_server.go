@@ -43,6 +43,19 @@ func (s *WorkoutGRPCServer) ListWorkouts(_ context.Context, _ *pb.ListWorkoutsRe
 }
 
 func (s *WorkoutGRPCServer) CreateWorkout(_ context.Context, req *pb.CreateWorkoutRequest) (*pb.WorkoutResponse, error) {
+	if !models.WorkoutType(req.Type).IsValid() {
+		return nil, status.Errorf(codes.InvalidArgument, "type must be one of: cardio, strength, flexibility")
+	}
+	if !models.WorkoutDifficulty(req.Difficulty).IsValid() {
+		return nil, status.Errorf(codes.InvalidArgument, "difficulty must be one of: easy, medium, hard")
+	}
+	if req.Duration <= 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "duration must be positive")
+	}
+	if req.CaloriesBurned < 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "calories_burned must not be negative")
+	}
+
 	w, err := s.store.Create(models.Workout{
 		Name:           req.Name,
 		Type:           models.WorkoutType(req.Type),
