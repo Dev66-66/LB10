@@ -81,3 +81,11 @@
 **Дата:** 2026-04-03
 **Промпт:** Исправь новые обнаруженные проблемы, закоммить их (атомарно) и обнови PROMPT_LOG.
 **Результат:** Выполнено 4 атомарных коммита. (1) go_workout_service.py: `resp.json()["token"]` и `resp.json()` обёрнуты в try/except (ValueError, KeyError) → 502; HTTPStatusError 5xx возвращает generic "upstream service error" вместо внутреннего текста, 4xx — пробрасывается как есть; вынесен `_raise_for_upstream` helper; уточнён тип `_request` до `dict[str, Any] | list[Any]`. (2) grpc_workout_service.py: добавлен fallback `except Exception` после `AioRpcError`; добавлен `timeout=5.0` на RPC-вызов. (3) workout_grpc_server.go: добавлены `strings.TrimSpace` и явная проверка пустого имени перед store.Create() — паритет с HTTP-хендлером. (4) GrpcWorkoutService.aclose() (no-op с пояснением), lifespan вызывает оба aclose(), README: go test -count=1. Все тесты проходят (Go: 12, Python: 6). Push выполнен.
+
+---
+
+## Промпт 11 — Проверка на оставшиеся критические ошибки
+
+**Дата:** 2026-04-03
+**Промпт:** Проверь, остались ли ещё критические ошибки.
+**Результат:** Найдена критическая проблема: в go_workout_service.py во всех трёх async-методах (_authenticate, _request, fetch_token) перехватывался только httpx.ConnectError, но не httpx.TimeoutException. При срабатывании таймаута (timeout=10.0) вылетал httpx.ReadTimeout — необработанное исключение → 500 вместо 503. Исправлено заменой ConnectError на базовый httpx.RequestError (покрывает ConnectError, TimeoutException, ReadError, ProtocolError и др.). Все 6 тестов проходят (ConnectError — подкласс RequestError, моки respx работают). 1 коммит, push выполнен.
