@@ -1,9 +1,12 @@
+import asyncio
+import os
+
 import httpx
 from fastapi import HTTPException
 
-_GO_BASE_URL = "http://localhost:8080"
-_GO_USERNAME = "admin"
-_GO_PASSWORD = "password123"
+_GO_BASE_URL = os.getenv("GO_SERVICE_URL", "http://localhost:8080")
+_GO_USERNAME = os.getenv("GO_USERNAME", "admin")
+_GO_PASSWORD = os.getenv("GO_PASSWORD", "password123")
 
 
 class GoWorkoutService:
@@ -12,8 +15,10 @@ class GoWorkoutService:
     def __init__(self) -> None:
         self._client = httpx.AsyncClient(base_url=_GO_BASE_URL, timeout=10.0)
         self._token: str | None = None
+        self._token_lock = asyncio.Lock()
 
     async def _authenticate(self) -> str:
+        """Fetch a fresh token from Go /auth/login. Must be called under _token_lock."""
         try:
             resp = await self._client.post(
                 "/auth/login",
@@ -27,13 +32,16 @@ class GoWorkoutService:
                 status_code=e.response.status_code,
                 detail=e.response.text,
             )
-        self._token = resp.json()["token"]
-        return self._token
+        return resp.json()["token"]
 
     async def _get_token(self) -> str:
-        if self._token is None:
-            return await self._authenticate()
-        return self._token
+        if self._token is not None:
+            return self._token
+        async with self._token_lock:
+            # Double-checked: another coroutine may have filled it while we waited.
+            if self._token is None:
+                self._token = await self._authenticate()
+            return self._token
 
     async def _request(self, method: str, path: str, **kwargs) -> dict | list:
         token = await self._get_token()

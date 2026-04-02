@@ -1,10 +1,12 @@
+import os
+
 import grpc
 from grpc import aio
 from fastapi import HTTPException
 
 from proto import workout_pb2, workout_pb2_grpc
 
-_GO_GRPC_HOST = "localhost:50051"
+_GO_GRPC_HOST = os.getenv("GRPC_HOST", "localhost:50051")
 
 
 class GrpcWorkoutService:
@@ -27,9 +29,7 @@ class GrpcWorkoutService:
                     "calories_burned": w.calories_burned,
                     "created_at": w.created_at,
                 }
-        except grpc.RpcError as e:
+        except grpc.aio.AioRpcError as e:
             if e.code() == grpc.StatusCode.NOT_FOUND:
                 raise HTTPException(status_code=404, detail=e.details())
-            raise HTTPException(status_code=503, detail="gRPC service unavailable")
-        except Exception:
             raise HTTPException(status_code=503, detail="gRPC service unavailable")

@@ -21,14 +21,9 @@ _WORKOUT = {
 
 @pytest.fixture(autouse=True)
 def reset_tokens():
-    """Reset cached JWT tokens on all module-level service instances before each test."""
-    import routers.workouts as wk
-    import routers.stats as st
-    import routers.auth as au
-
-    wk._go._token = None
-    st._go._token = None
-    au._go._token = None
+    """Reset the shared GoWorkoutService token cache before each test."""
+    from services.dependencies import _go_service
+    _go_service._token = None
     yield
 
 
