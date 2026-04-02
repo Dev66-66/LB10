@@ -49,3 +49,11 @@
 **Дата:** 2026-04-03
 **Промпт:** Реализуй Python-сервис внутри python-service/ используя FastAPI. Архитектура: main.py, routers/workouts.py, routers/auth.py, routers/stats.py, services/go_workout_service.py (HTTP-клиент), services/grpc_workout_service.py (gRPC-клиент), models/workout.py, proto/ (сгенерированные стабы). Pydantic-модели с валидацией type/difficulty через Literal и name через field_validator. GoWorkoutService: asynchx, ConnectError→503, HTTPStatusError→проброс кода, JWT-аутентификация к Go. GrpcWorkoutService: grpc.aio. Эндпоинты: GET/POST /workouts, GET /workouts/{id}/grpc, GET /stats, POST /auth/token. Порт 8000.
 **Результат:** Установлены fastapi 0.135.3, httpx 0.28.1, grpcio 1.80.0. Сгенерированы Python proto-стабы, исправлен импорт в workout_pb2_grpc.py. Реализованы все файлы сервиса. WorkoutCreate валидирует name (пустые/пробельные → ValueError), type и difficulty через Literal. GoWorkoutService кэширует JWT и переиспользует его. GrpcWorkoutService использует grpc.aio. README обновлён. 2 коммита, push выполнен.
+
+---
+
+## Промпт 7 — Тесты для Python-сервиса
+
+**Дата:** 2026-04-03
+**Промпт:** Напиши тесты для Python-сервиса используя pytest + respx. Файл: python-service/tests/test_workouts.py. Тесты: test_create_workout_valid (мок Go POST → 201), test_create_workout_empty_name (Pydantic ловит до HTTP), test_get_workouts (мок GET → список), test_go_service_unavailable (ConnectError → 503), test_stats_aggregation (мок списка → проверить агрегацию), test_jwt_forwarded (проверить заголовок Authorization). Используй pytest-asyncio для async-тестов.
+**Результат:** Установлены pytest 9.0.2, pytest-asyncio 1.3.0, respx 0.22.0. Создан pytest.ini (asyncio_mode=auto, pythonpath=.). Написаны 6 тестов в tests/test_workouts.py. Используется `async with respx.mock() as mock:` (context manager, избегает проблем с декоратором + фикстурами). Фикстура reset_tokens сбрасывает кэш JWT всех сервисов перед каждым тестом. Фикстура client использует ASGITransport → не перехватывается respx. Все 6 тестов проходят. 1 коммит, push выполнен.
