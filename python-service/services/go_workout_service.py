@@ -1,5 +1,6 @@
 import asyncio
 import os
+from typing import Any
 
 import httpx
 from fastapi import HTTPException
@@ -7,6 +8,18 @@ from fastapi import HTTPException
 _GO_BASE_URL = os.getenv("GO_SERVICE_URL", "http://localhost:8080")
 _GO_USERNAME = os.getenv("GO_USERNAME", "admin")
 _GO_PASSWORD = os.getenv("GO_PASSWORD", "password123")
+
+
+def _raise_for_upstream(e: httpx.HTTPStatusError) -> None:
+    """Convert an upstream HTTPStatusError to an HTTPException.
+
+    4xx errors are forwarded as-is (they carry validation messages meant for
+    the caller). 5xx errors get a generic message so internal details are not
+    leaked to the end client.
+    """
+    if e.response.status_code >= 500:
+        raise HTTPException(status_code=502, detail="upstream service error")
+    raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
 
 
 class GoWorkoutService:
@@ -28,11 +41,11 @@ class GoWorkoutService:
         except httpx.ConnectError:
             raise HTTPException(status_code=503, detail="Go service unavailable")
         except httpx.HTTPStatusError as e:
-            raise HTTPException(
-                status_code=e.response.status_code,
-                detail=e.response.text,
-            )
-        return resp.json()["token"]
+            _raise_for_upstream(e)
+        try:
+            return resp.json()["token"]
+        except (ValueError, KeyError):
+            raise HTTPException(status_code=502, detail="Go service returned unexpected response")
 
     async def _get_token(self) -> str:
         if self._token is not None:
@@ -43,20 +56,20 @@ class GoWorkoutService:
                 self._token = await self._authenticate()
             return self._token
 
-    async def _request(self, method: str, path: str, **kwargs) -> dict | list:
+    async def _request(self, method: str, path: str, **kwargs) -> dict[str, Any] | list[Any]:
         token = await self._get_token()
         headers = {"Authorization": f"Bearer {token}"}
         try:
             resp = await self._client.request(method, path, headers=headers, **kwargs)
             resp.raise_for_status()
-            return resp.json()
         except httpx.ConnectError:
             raise HTTPException(status_code=503, detail="Go service unavailable")
         except httpx.HTTPStatusError as e:
-            raise HTTPException(
-                status_code=e.response.status_code,
-                detail=e.response.text,
-            )
+            _raise_for_upstream(e)
+        try:
+            return resp.json()
+        except ValueError:
+            raise HTTPException(status_code=502, detail="Go service returned non-JSON response")
 
     async def get_all(self) -> list:
         return await self._request("GET", "/workouts")
@@ -72,14 +85,14 @@ class GoWorkoutService:
                 json={"username": username, "password": password},
             )
             resp.raise_for_status()
-            return resp.json()["token"]
         except httpx.ConnectError:
             raise HTTPException(status_code=503, detail="Go service unavailable")
         except httpx.HTTPStatusError as e:
-            raise HTTPException(
-                status_code=e.response.status_code,
-                detail=e.response.text,
-            )
+            _raise_for_upstream(e)
+        try:
+            return resp.json()["token"]
+        except (ValueError, KeyError):
+            raise HTTPException(status_code=502, detail="Go service returned unexpected response")
 
     async def aclose(self) -> None:
         await self._client.aclose()
