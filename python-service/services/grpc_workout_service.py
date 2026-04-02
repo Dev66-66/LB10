@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from proto import workout_pb2, workout_pb2_grpc
 
 _GO_GRPC_HOST = os.getenv("GRPC_HOST", "localhost:50051")
+_GRPC_TIMEOUT = 5.0  # seconds per RPC call
 
 
 class GrpcWorkoutService:
@@ -17,7 +18,8 @@ class GrpcWorkoutService:
             async with aio.insecure_channel(_GO_GRPC_HOST) as channel:
                 stub = workout_pb2_grpc.WorkoutServiceStub(channel)
                 response = await stub.GetWorkout(
-                    workout_pb2.GetWorkoutRequest(id=workout_id)
+                    workout_pb2.GetWorkoutRequest(id=workout_id),
+                    timeout=_GRPC_TIMEOUT,
                 )
                 w = response.workout
                 return {
@@ -32,4 +34,6 @@ class GrpcWorkoutService:
         except grpc.aio.AioRpcError as e:
             if e.code() == grpc.StatusCode.NOT_FOUND:
                 raise HTTPException(status_code=404, detail=e.details())
+            raise HTTPException(status_code=503, detail="gRPC service unavailable")
+        except Exception:
             raise HTTPException(status_code=503, detail="gRPC service unavailable")
