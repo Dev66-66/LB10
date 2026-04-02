@@ -33,3 +33,11 @@
 **Дата:** 2026-04-02
 **Промпт:** Реализуй gRPC-сервер в Go-сервисе. Создай proto/workout.proto в корне: сервис WorkoutService с методами GetWorkout, ListWorkouts, CreateWorkout; сообщение Workout с полями id/name/type/duration/difficulty/calories_burned/created_at. Сгенерируй Go-код из proto, добавь команду protoc в README. Реализуй gRPC-сервер в internal/grpc/workout_grpc_server.go. gRPC на порту 50051, HTTP на 8080, оба запускаются одновременно в main.go, переиспользуют одно in-memory хранилище.
 **Результат:** Установлен protoc v27.3. Создан proto/workout.proto. Сгенерированы pb/workout.pb.go и pb/workout_grpc.pb.go. Реализован WorkoutGRPCServer с методами GetWorkout/ListWorkouts/CreateWorkout, коды gRPC-статусов (NotFound, InvalidArgument). App.New() принимает store как аргумент — оба сервера делят один экземпляр store. main.go запускает gRPC в горутине, HTTP блокирует. README обновлён командой protoc. Сборка и все тесты проходят. 2 коммита, push выполнен.
+
+---
+
+## Промпт 5 — JWT-аутентификация в Go-сервисе
+
+**Дата:** 2026-04-03
+**Промпт:** Добавь JWT-аутентификацию в Go-сервис. POST /auth/login принимает username/password, хардкодный пользователь admin/password123, возвращает {"token":"..."}. JWT: HS256, секрет из JWT_SECRET (по умолчанию "dev-secret"), TTL 24 часа, claims: username+exp. Все /workouts/* защитить JWT-middleware (Bearer-токен, 401 если невалидный). Написать 2 теста: валидный токен проходит, невалидный → 401. Библиотека: github.com/golang-jwt/jwt/v5.
+**Результат:** Созданы auth_handler.go (POST /auth/login) и middleware/jwt.go (Bearer-валидация). RegisterRoutes изменён на gin.IRouter. app.go читает JWT_SECRET из env, монтирует /auth/login публично и /workouts/* через JWT middleware. Все 4 существующих теста обновлены с validBearerToken(). Добавлены TestJWTMiddleware_ValidToken_PassesThrough и TestJWTMiddleware_InvalidToken_Returns401. Все 12 тестов проходят. 2 коммита, push выполнен.
