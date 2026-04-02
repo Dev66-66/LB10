@@ -25,3 +25,11 @@
 **Дата:** 2026-04-02
 **Промпт:** Напиши тесты для Go-сервиса внутри go-service/. Юнит-тесты для хранилища: TestGetAll_EmptyReturnsSliceNotNil, TestCreate_ValidWorkout, TestCreate_EmptyNameRejected, TestCreate_WhitespaceNameRejected, TestGetByID_NotFound. Интеграционные тесты для HTTP-хендлеров: POST /workouts с валидным телом → 201, POST /workouts с пустым name → 400, GET /workouts → 200 массив не null, GET /workouts/:id несуществующий → 404, middleware логгера проверить поля key=value. Только стандартная библиотека + testify, реальное хранилище.
 **Результат:** Добавлена валидация имени в store.Create (возвращает ErrInvalidName), обновлён обработчик. Написаны 5 юнит-тестов в workout_store_test.go и 5 интеграционных тестов в workout_handler_test.go (тест middleware захватывает os.Stdout через os.Pipe). Добавлен testify. Все 10 тестов проходят (go test ./...). 1 коммит, push выполнен.
+
+---
+
+## Промпт 4 — gRPC-сервер в Go-сервисе
+
+**Дата:** 2026-04-02
+**Промпт:** Реализуй gRPC-сервер в Go-сервисе. Создай proto/workout.proto в корне: сервис WorkoutService с методами GetWorkout, ListWorkouts, CreateWorkout; сообщение Workout с полями id/name/type/duration/difficulty/calories_burned/created_at. Сгенерируй Go-код из proto, добавь команду protoc в README. Реализуй gRPC-сервер в internal/grpc/workout_grpc_server.go. gRPC на порту 50051, HTTP на 8080, оба запускаются одновременно в main.go, переиспользуют одно in-memory хранилище.
+**Результат:** Установлен protoc v27.3. Создан proto/workout.proto. Сгенерированы pb/workout.pb.go и pb/workout_grpc.pb.go. Реализован WorkoutGRPCServer с методами GetWorkout/ListWorkouts/CreateWorkout, коды gRPC-статусов (NotFound, InvalidArgument). App.New() принимает store как аргумент — оба сервера делят один экземпляр store. main.go запускает gRPC в горутине, HTTP блокирует. README обновлён командой protoc. Сборка и все тесты проходят. 2 коммита, push выполнен.
