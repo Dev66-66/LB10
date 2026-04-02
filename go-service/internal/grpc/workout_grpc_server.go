@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -55,9 +56,13 @@ func (s *WorkoutGRPCServer) CreateWorkout(_ context.Context, req *pb.CreateWorko
 	if req.CaloriesBurned < 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "calories_burned must not be negative")
 	}
+	trimmedName := strings.TrimSpace(req.Name)
+	if trimmedName == "" {
+		return nil, status.Error(codes.InvalidArgument, store.ErrInvalidName.Error())
+	}
 
 	w, err := s.store.Create(models.Workout{
-		Name:           req.Name,
+		Name:           trimmedName,
 		Type:           models.WorkoutType(req.Type),
 		Duration:       int(req.Duration),
 		Difficulty:     models.WorkoutDifficulty(req.Difficulty),
