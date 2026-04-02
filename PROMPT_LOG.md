@@ -41,3 +41,11 @@
 **Дата:** 2026-04-03
 **Промпт:** Добавь JWT-аутентификацию в Go-сервис. POST /auth/login принимает username/password, хардкодный пользователь admin/password123, возвращает {"token":"..."}. JWT: HS256, секрет из JWT_SECRET (по умолчанию "dev-secret"), TTL 24 часа, claims: username+exp. Все /workouts/* защитить JWT-middleware (Bearer-токен, 401 если невалидный). Написать 2 теста: валидный токен проходит, невалидный → 401. Библиотека: github.com/golang-jwt/jwt/v5.
 **Результат:** Созданы auth_handler.go (POST /auth/login) и middleware/jwt.go (Bearer-валидация). RegisterRoutes изменён на gin.IRouter. app.go читает JWT_SECRET из env, монтирует /auth/login публично и /workouts/* через JWT middleware. Все 4 существующих теста обновлены с validBearerToken(). Добавлены TestJWTMiddleware_ValidToken_PassesThrough и TestJWTMiddleware_InvalidToken_Returns401. Все 12 тестов проходят. 2 коммита, push выполнен.
+
+---
+
+## Промпт 6 — Python-сервис на FastAPI
+
+**Дата:** 2026-04-03
+**Промпт:** Реализуй Python-сервис внутри python-service/ используя FastAPI. Архитектура: main.py, routers/workouts.py, routers/auth.py, routers/stats.py, services/go_workout_service.py (HTTP-клиент), services/grpc_workout_service.py (gRPC-клиент), models/workout.py, proto/ (сгенерированные стабы). Pydantic-модели с валидацией type/difficulty через Literal и name через field_validator. GoWorkoutService: asynchx, ConnectError→503, HTTPStatusError→проброс кода, JWT-аутентификация к Go. GrpcWorkoutService: grpc.aio. Эндпоинты: GET/POST /workouts, GET /workouts/{id}/grpc, GET /stats, POST /auth/token. Порт 8000.
+**Результат:** Установлены fastapi 0.135.3, httpx 0.28.1, grpcio 1.80.0. Сгенерированы Python proto-стабы, исправлен импорт в workout_pb2_grpc.py. Реализованы все файлы сервиса. WorkoutCreate валидирует name (пустые/пробельные → ValueError), type и difficulty через Literal. GoWorkoutService кэширует JWT и переиспользует его. GrpcWorkoutService использует grpc.aio. README обновлён. 2 коммита, push выполнен.

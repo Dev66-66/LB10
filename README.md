@@ -65,9 +65,9 @@ protoc \
 
 ---
 
-### python-service (Python REST API)
+### python-service (Python REST API + gRPC client)
 
-**Стек:** Python, FastAPI, SQLAlchemy, PostgreSQL
+**Стек:** Python, FastAPI, httpx, grpcio
 
 **Запуск:**
 
@@ -76,11 +76,35 @@ cd python-service
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env       # заполните переменные окружения
 uvicorn main:app --reload --port 8000
 ```
 
 API будет доступен на `http://localhost:8000`
+
+> **Важно:** перед запуском Python-сервиса должен быть запущен Go-сервис на портах 8080 (HTTP) и 50051 (gRPC).
+
+#### Эндпоинты Python-сервиса
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| POST | `/auth/token` | Получить JWT от Go-сервиса |
+| GET | `/workouts` | Список тренировок (через HTTP → Go) |
+| POST | `/workouts` | Создать тренировку (через HTTP → Go) |
+| GET | `/workouts/{id}/grpc` | Получить тренировку через gRPC → Go |
+| GET | `/stats` | Агрегация по type и difficulty |
+
+#### Генерация Python gRPC-стабов
+
+```bash
+cd python-service
+python -m grpc_tools.protoc \
+  --proto_path=../proto \
+  --python_out=proto \
+  --grpc_python_out=proto \
+  ../proto/workout.proto
+# После генерации заменить в proto/workout_pb2_grpc.py:
+#   import workout_pb2  →  from proto import workout_pb2
+```
 
 ---
 
