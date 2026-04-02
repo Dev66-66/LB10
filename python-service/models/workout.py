@@ -21,8 +21,8 @@ class WorkoutCreate(BaseModel):
 class WorkoutResponse(BaseModel):
     id: int
     name: str
-    type: str
+    type: Literal["cardio", "strength", "flexibility"]
     duration: int
-    difficulty: str
+    difficulty: Literal["easy", "medium", "hard"]
     calories_burned: int
     created_at: str
