@@ -27,20 +27,41 @@
 
 ## Сервисы
 
-### go-service (Go REST API)
+### go-service (Go REST API + gRPC)
 
-**Стек:** Go, Gin, GORM, PostgreSQL
+**Стек:** Go, Gin, gRPC, in-memory store
 
 **Запуск:**
 
 ```bash
 cd go-service
-cp .env.example .env   # заполните переменные окружения
 go mod download
-go run ./cmd/main.go
+go run ./cmd/server/main.go
 ```
 
-API будет доступен на `http://localhost:8080`
+- HTTP REST API: `http://localhost:8080`
+- gRPC сервер: `localhost:50051`
+
+#### Генерация кода из proto
+
+Требования: [protoc ≥ 27](https://github.com/protocolbuffers/protobuf/releases), плагины:
+
+```bash
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+```
+
+Команда генерации (выполнять из корня репозитория):
+
+```bash
+protoc \
+  --proto_path=proto \
+  --go_out=go-service/internal/grpc/pb \
+  --go_opt=paths=source_relative \
+  --go-grpc_out=go-service/internal/grpc/pb \
+  --go-grpc_opt=paths=source_relative \
+  proto/workout.proto
+```
 
 ---
 

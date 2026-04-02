@@ -12,14 +12,13 @@ type App struct {
 	router *gin.Engine
 }
 
-func New() *App {
+func New(s *store.WorkoutStore) *App {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(middleware.Logger())
 
-	s := store.NewWorkoutStore()
 	h := handlers.NewWorkoutHandler(s)
 	h.RegisterRoutes(r)
 
