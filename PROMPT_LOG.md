@@ -17,3 +17,11 @@
 **Дата:** 2026-04-02
 **Промпт:** Реализуй Go-сервис (Gin) внутри go-service/ с чистой архитектурой. Структура: cmd/server/main.go, internal/app/app.go, internal/handlers/http/workout_handler.go, internal/store/workout_store.go, internal/models/workout.go, internal/middleware/logger.go. Требования: модель Workout с полями id/name/type/duration/difficulty/calories_burned/created_at, in-memory хранилище с sync.RWMutex, GetAll() возвращает пустой слайс, эндпоинты GET/POST/GET/:id/DELETE/:id /workouts, валидация name через strings.TrimSpace, gin.New() + явный gin.Recovery(), middleware логгера key=value, порт 8080.
 **Результат:** Реализованы все 6 файлов Go-сервиса. Модель с enum-типами WorkoutType/WorkoutDifficulty и методами IsValid(). Потокобезопасное in-memory хранилище на sync.RWMutex. Middleware логгера с форматом key=value. Обработчики с валидацией (name, type, difficulty, duration, calories_burned). App инициализирует gin.New() + Recovery() + Logger(). Добавлен gin v1.12.0. Сборка проверена (go build ./...). Два коммита, push выполнен.
+
+---
+
+## Промпт 3 — Тесты для Go-сервиса
+
+**Дата:** 2026-04-02
+**Промпт:** Напиши тесты для Go-сервиса внутри go-service/. Юнит-тесты для хранилища: TestGetAll_EmptyReturnsSliceNotNil, TestCreate_ValidWorkout, TestCreate_EmptyNameRejected, TestCreate_WhitespaceNameRejected, TestGetByID_NotFound. Интеграционные тесты для HTTP-хендлеров: POST /workouts с валидным телом → 201, POST /workouts с пустым name → 400, GET /workouts → 200 массив не null, GET /workouts/:id несуществующий → 404, middleware логгера проверить поля key=value. Только стандартная библиотека + testify, реальное хранилище.
+**Результат:** Добавлена валидация имени в store.Create (возвращает ErrInvalidName), обновлён обработчик. Написаны 5 юнит-тестов в workout_store_test.go и 5 интеграционных тестов в workout_handler_test.go (тест middleware захватывает os.Stdout через os.Pipe). Добавлен testify. Все 10 тестов проходят (go test ./...). 1 коммит, push выполнен.
