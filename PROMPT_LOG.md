@@ -57,3 +57,11 @@
 **Дата:** 2026-04-03
 **Промпт:** Напиши тесты для Python-сервиса используя pytest + respx. Файл: python-service/tests/test_workouts.py. Тесты: test_create_workout_valid (мок Go POST → 201), test_create_workout_empty_name (Pydantic ловит до HTTP), test_get_workouts (мок GET → список), test_go_service_unavailable (ConnectError → 503), test_stats_aggregation (мок списка → проверить агрегацию), test_jwt_forwarded (проверить заголовок Authorization). Используй pytest-asyncio для async-тестов.
 **Результат:** Установлены pytest 9.0.2, pytest-asyncio 1.3.0, respx 0.22.0. Создан pytest.ini (asyncio_mode=auto, pythonpath=.). Написаны 6 тестов в tests/test_workouts.py. Используется `async with respx.mock() as mock:` (context manager, избегает проблем с декоратором + фикстурами). Фикстура reset_tokens сбрасывает кэш JWT всех сервисов перед каждым тестом. Фикстура client использует ASGITransport → не перехватывается respx. Все 6 тестов проходят. 1 коммит, push выполнен.
+
+---
+
+## Промпт 8 — Финализация проекта
+
+**Дата:** 2026-04-03
+**Промпт:** Финализируй проект. 1) Обнови README.md: данные студента, запуск Go-сервиса (go run ./cmd/server), запуск Python-сервиса (uvicorn main:app --reload), генерация proto, запуск тестов (go test ./... и pytest), переменные окружения (JWT_SECRET, GO_SERVICE_URL, GRPC_HOST), ASCII-диаграмма взаимодействия сервисов. 2) Убедись что PROMPT_LOG.md содержит записи для всех 8 промптов. 3) Запусти go vet ./... и исправь предупреждения. 4) Убедись что GetAll() возвращает [] а не null.
+**Результат:** README.md полностью переписан: данные студента, ASCII-архитектурная диаграмма, таблицы эндпоинтов для обоих сервисов, таблица переменных окружения, инструкции запуска, тестирования и генерации proto. go vet ./... — без ошибок. GetAll() использует make([]models.Workout, 0, ...) → всегда возвращает JSON-массив []. Все тесты проходят: Go (12 тестов), Python (6 тестов). PROMPT_LOG.md содержит все 8 промптов. 1 коммит, push выполнен.
