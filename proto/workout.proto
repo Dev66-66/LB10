@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package workout;
+
+option go_package = "github.com/Dev66-66/LB10/go-service/internal/grpc/pb";
+
+// WorkoutService exposes CRUD operations for workout entries.
+service WorkoutService {
+  rpc GetWorkout(GetWorkoutRequest) returns (WorkoutResponse);
+  rpc ListWorkouts(ListWorkoutsRequest) returns (ListWorkoutsResponse);
+  rpc CreateWorkout(CreateWorkoutRequest) returns (WorkoutResponse);
+}
+
+message Workout {
+  int32  id              = 1;
+  string name            = 2;
+  string type            = 3;
+  int32  duration        = 4;
+  string difficulty      = 5;
+  int32  calories_burned = 6;
+  string created_at      = 7;
+}
+
+message GetWorkoutRequest {
+  int32 id = 1;
+}
+
+message ListWorkoutsRequest {}
+
+message ListWorkoutsResponse {
+  repeated Workout workouts = 1;
+}
+
+message CreateWorkoutRequest {
+  string name            = 1;
+  string type            = 2;
+  int32  duration        = 3;
+  string difficulty      = 4;
+  int32  calories_burned = 5;
+}
+
+message WorkoutResponse {
+  Workout workout = 1;
+}
