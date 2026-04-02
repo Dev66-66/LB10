@@ -8,9 +8,9 @@ go-service/*.dylib
 
 # Python
 python-service/venv/
-python-service/__pycache__/
-python-service/*.pyc
-python-service/*.pyo
+python-service/**/__pycache__/
+python-service/**/*.pyc
+python-service/**/*.pyo
 python-service/.env
 
 # Go env
