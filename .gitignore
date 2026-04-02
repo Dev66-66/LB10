@@ -1,0 +1,27 @@
+# Go
+go-service/vendor/
+go-service/*.exe
+go-service/*.exe~
+go-service/*.dll
+go-service/*.so
+go-service/*.dylib
+
+# Python
+python-service/venv/
+python-service/__pycache__/
+python-service/*.pyc
+python-service/*.pyo
+python-service/.env
+
+# Go env
+go-service/.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
