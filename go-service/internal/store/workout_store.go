@@ -2,6 +2,7 @@ package store
 
 import (
 	"errors"
+	"strings"
 	"sync"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 )
 
 var ErrNotFound = errors.New("workout not found")
+var ErrInvalidName = errors.New("name must not be empty")
 
 type WorkoutStore struct {
 	mu      sync.RWMutex
@@ -45,7 +47,11 @@ func (s *WorkoutStore) GetByID(id int) (models.Workout, error) {
 	return w, nil
 }
 
-func (s *WorkoutStore) Create(w models.Workout) models.Workout {
+func (s *WorkoutStore) Create(w models.Workout) (models.Workout, error) {
+	if strings.TrimSpace(w.Name) == "" {
+		return models.Workout{}, ErrInvalidName
+	}
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -53,7 +59,7 @@ func (s *WorkoutStore) Create(w models.Workout) models.Workout {
 	w.CreatedAt = time.Now().UTC()
 	s.items[w.ID] = w
 	s.nextID++
-	return w
+	return w, nil
 }
 
 func (s *WorkoutStore) Delete(id int) error {

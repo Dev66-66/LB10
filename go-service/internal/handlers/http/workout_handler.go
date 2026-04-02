@@ -67,13 +67,17 @@ func (h *WorkoutHandler) Create(c *gin.Context) {
 		return
 	}
 
-	w := h.store.Create(models.Workout{
+	w, err := h.store.Create(models.Workout{
 		Name:           strings.TrimSpace(req.Name),
 		Type:           req.Type,
 		Duration:       req.Duration,
 		Difficulty:     req.Difficulty,
 		CaloriesBurned: req.CaloriesBurned,
 	})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusCreated, w)
 }
