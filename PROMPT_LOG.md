@@ -73,3 +73,11 @@
 **Дата:** 2026-04-03
 **Промпт:** Исправь все найденные проблемы и недочёты из code review. Оставляя атомарные коммиты.
 **Результат:** Выполнено 4 атомарных коммита. (1) Рефакторинг Python-сервиса: единственный синглтон GoWorkoutService через services/dependencies.py, все роутеры используют Depends() вместо module-level инстансов, добавлен asyncio.Lock для token refresh (double-checked locking), lifespan закрывает httpx-клиент при завершении, тест reset_tokens упрощён до одного инстанса, env-переменные GO_SERVICE_URL/GO_USERNAME/GO_PASSWORD/GRPC_HOST читаются через os.getenv. (2) WorkoutResponse: type и difficulty — Literal вместо str; grpc_workout_service: bare except → grpc.aio.AioRpcError. (3) Go gRPC: CreateWorkout теперь валидирует type, difficulty, duration, calories_burned аналогично HTTP-хендлеру. (4) .gitignore: glob **.exe покрывает поддиректории; README: go run ./cmd/server, добавлены GO_USERNAME/GO_PASSWORD в таблицу env vars, удалена заметка о захардкоженных значениях; proto/__init__.py: добавлен поясняющий комментарий. Все тесты проходят (Go: 12, Python: 6). Push выполнен.
+
+---
+
+## Промпт 10 — Исправление замечаний повторного code review
+
+**Дата:** 2026-04-03
+**Промпт:** Исправь новые обнаруженные проблемы, закоммить их (атомарно) и обнови PROMPT_LOG.
+**Результат:** Выполнено 4 атомарных коммита. (1) go_workout_service.py: `resp.json()["token"]` и `resp.json()` обёрнуты в try/except (ValueError, KeyError) → 502; HTTPStatusError 5xx возвращает generic "upstream service error" вместо внутреннего текста, 4xx — пробрасывается как есть; вынесен `_raise_for_upstream` helper; уточнён тип `_request` до `dict[str, Any] | list[Any]`. (2) grpc_workout_service.py: добавлен fallback `except Exception` после `AioRpcError`; добавлен `timeout=5.0` на RPC-вызов. (3) workout_grpc_server.go: добавлены `strings.TrimSpace` и явная проверка пустого имени перед store.Create() — паритет с HTTP-хендлером. (4) GrpcWorkoutService.aclose() (no-op с пояснением), lifespan вызывает оба aclose(), README: go test -count=1. Все тесты проходят (Go: 12, Python: 6). Push выполнен.
