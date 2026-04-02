@@ -38,7 +38,7 @@ class GoWorkoutService:
                 json={"username": _GO_USERNAME, "password": _GO_PASSWORD},
             )
             resp.raise_for_status()
-        except httpx.ConnectError:
+        except httpx.RequestError:
             raise HTTPException(status_code=503, detail="Go service unavailable")
         except httpx.HTTPStatusError as e:
             _raise_for_upstream(e)
@@ -62,7 +62,7 @@ class GoWorkoutService:
         try:
             resp = await self._client.request(method, path, headers=headers, **kwargs)
             resp.raise_for_status()
-        except httpx.ConnectError:
+        except httpx.RequestError:
             raise HTTPException(status_code=503, detail="Go service unavailable")
         except httpx.HTTPStatusError as e:
             _raise_for_upstream(e)
@@ -85,7 +85,7 @@ class GoWorkoutService:
                 json={"username": username, "password": password},
             )
             resp.raise_for_status()
-        except httpx.ConnectError:
+        except httpx.RequestError:
             raise HTTPException(status_code=503, detail="Go service unavailable")
         except httpx.HTTPStatusError as e:
             _raise_for_upstream(e)
