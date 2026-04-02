@@ -20,7 +20,7 @@ func NewWorkoutHandler(s *store.WorkoutStore) *WorkoutHandler {
 	return &WorkoutHandler{store: s}
 }
 
-func (h *WorkoutHandler) RegisterRoutes(r *gin.Engine) {
+func (h *WorkoutHandler) RegisterRoutes(r gin.IRouter) {
 	r.GET("/workouts", h.GetAll)
 	r.POST("/workouts", h.Create)
 	r.GET("/workouts/:id", h.GetByID)
