@@ -1,10 +1,11 @@
 # Go
 go-service/vendor/
-go-service/*.exe
-go-service/*.exe~
-go-service/*.dll
-go-service/*.so
-go-service/*.dylib
+go-service/**/*.exe
+go-service/**/*.exe~
+go-service/**/*.dll
+go-service/**/*.so
+go-service/**/*.dylib
+# go.sum is intentionally committed (reproducible builds)
 
 # Python
 python-service/venv/

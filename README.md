@@ -85,9 +85,8 @@
 | `JWT_SECRET` | go-service | `dev-secret` | Секрет подписи JWT (HS256) |
 | `GO_SERVICE_URL` | python-service | `http://localhost:8080` | Базовый URL Go HTTP API |
 | `GRPC_HOST` | python-service | `localhost:50051` | Адрес Go gRPC сервера |
-
-> В текущей реализации `GO_SERVICE_URL` и `GRPC_HOST` захардкожены в сервисных классах.
-> Для смены адресов отредактируйте `services/go_workout_service.py` и `services/grpc_workout_service.py`.
+| `GO_USERNAME` | python-service | `admin` | Логин для аутентификации в Go |
+| `GO_PASSWORD` | python-service | `password123` | Пароль для аутентификации в Go |
 
 ---
 
@@ -104,7 +103,7 @@
 cd go-service
 # Опционально: задать секрет JWT
 export JWT_SECRET=my-secret
-go run ./cmd/server/main.go
+go run ./cmd/server
 ```
 
 - REST API: `http://localhost:8080`
